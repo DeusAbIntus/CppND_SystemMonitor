@@ -16,16 +16,16 @@ float Processor::Utilization() {
   vector<long> CpuVector = LinuxParser::CpuUtilizationLongVector();  // get CpuData from file
   string line;
   string CpuName;
-  float user_{CpuVector[LinuxParser::kUser_]}, 
-        nice_{CpuVector[LinuxParser::kNice_]}, 
-        system_{CpuVector[LinuxParser::kSystem_]}, 
-        idle_{CpuVector[LinuxParser::kIdle_]}, 
-        iowait_{CpuVector[LinuxParser::kIOwait_]}, 
-        irq_{CpuVector[LinuxParser::kIRQ_]},
-        softirq_{CpuVector[LinuxParser::kSoftIRQ_]}, 
-        steal_{CpuVector[LinuxParser::kSteal_]}, 
-        guest_{CpuVector[LinuxParser::kGuest_]},
-        guestnice_{CpuVector[LinuxParser::kGuestNice_]},
+  float user_{(float)CpuVector[LinuxParser::kUser_]}, 
+        nice_{(float)CpuVector[LinuxParser::kNice_]}, 
+        system_{(float)CpuVector[LinuxParser::kSystem_]}, 
+        idle_{(float)CpuVector[LinuxParser::kIdle_]}, 
+        iowait_{(float)CpuVector[LinuxParser::kIOwait_]}, 
+        irq_{(float)CpuVector[LinuxParser::kIRQ_]},
+        softirq_{(float)CpuVector[LinuxParser::kSoftIRQ_]}, 
+        steal_{(float)CpuVector[LinuxParser::kSteal_]}, 
+    //  guest_{(float)CpuVector[LinuxParser::kGuest_]},
+    //  guestnice_{(float)CpuVector[LinuxParser::kGuestNice_]},
         Idle, NonIdle, Total, Totald, Idled, CPU_Percentage;
 
   // PrevIdle = previdle + previowait

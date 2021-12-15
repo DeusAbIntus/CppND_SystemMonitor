@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "linux_parser.h"
 
@@ -10,6 +11,7 @@ using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+using std::cout;
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -200,7 +202,7 @@ vector<string> LinuxParser::CpuUtilization() {
          }
       }   
     }
-  }
+  } 
   return CPUVector; 
 }
 
@@ -333,20 +335,22 @@ string LinuxParser::User(int pid) {
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid) { 
-  vector<string> ProcessVector = LinuxParser::ProcessStatData(pid);
-  long ProcUptime;
- /* string line;
+  std::vector<string> ProcessVector = LinuxParser::ProcessStatData(pid);
+  float ProcUptime = std::stof(ProcessVector[kstarttime_])/sysconf(_SC_CLK_TCK);
+  /*string line;
   string DataValue; 
   std::ifstream filestream(kProcDirectory+to_string(pid)+kStatFilename);
   if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
+      std::getline(filestream, line);
       std::istringstream linestream(line);
-         while (linestream >> DataValue ) { //push values to the back of string vector
-          ProcessVector.push_back(DataValue);
-         }     
-    }*/
-  ProcUptime = std::stol(ProcessVector[kstarttime_]);
-  return ProcUptime/sysconf(_SC_CLK_TCK);  
+      std::vector<string> ProcessVector(std::istream_iterator<string>(linestream), {}); 
+
+      float ProcStarttime = std::stof(ProcessVector[kstarttime_]);
+      ProcUptime = ProcStarttime/sysconf(_SC_CLK_TCK);  
+  } */
+  
+  return ProcUptime;
+ 
 }
 
 // Helper function declared to return an vector<string> containing Process data of given Process PID
@@ -356,23 +360,49 @@ vector<string> LinuxParser::ProcessStatData(int pid) {
   string DataValue;
   std::ifstream filestream(kProcDirectory+to_string(pid)+kStatFilename);
   if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
+    while( std::getline(filestream, line)){
       std::istringstream linestream(line);
          while (linestream >> DataValue ) { //push values to the back of string vector
             ProcVector.push_back(DataValue);
-         }     
+         } 
+        //return ProcVector;    
     }
   }
   return ProcVector;
-}
+} 
 
 // Helper function to calculate Cpu Utilixation of a given <PID> Process
 // CPU usage calculated according to Stackoverflow Post :
 // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
 float LinuxParser::ProcessCpuUtilization(int pid) {
-  long ProcActiveJiffies = LinuxParser::ActiveJiffies(pid);
+  /*long ProcActiveJiffies = LinuxParser::ActiveJiffies(pid);
   long SysUptime = LinuxParser::UpTime();
   long ProcUptime = LinuxParser::UpTime(pid);
-  long CpuUsage = ((ProcActiveJiffies/sysconf(_SC_CLK_TCK))/(SysUptime-ProcUptime))*100;
-  return CpuUsage;
+  float CpuUsage = (float)((ProcActiveJiffies/sysconf(_SC_CLK_TCK))/(SysUptime - ProcUptime));
+  return CpuUsage;*/
+
+ // std::vector<string> ProcessData = LinuxParser::ProcessStatData(pid);
+  string line;
+ 
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
+  
+  std::getline(filestream, line); // file contains only one line    
+  std::istringstream buffer(line);
+  std::istream_iterator<string> beginning(buffer), end;
+  std::vector<string> ProcessData(beginning, end);
+
+  float uptime = LinuxParser::UpTime();
+  float utime = stof(ProcessData[kutime_]);
+  float stime = stof(ProcessData[kstime_]);
+  float cutime = stof(ProcessData[kcuttime_]);
+  float cstime = stof(ProcessData[kcstime_]);
+  float starttime = stof(ProcessData[kstarttime_]); 
+  float hertz = sysconf(_SC_CLK_TCK);
+
+  float total_time = utime + stime + cutime + cstime;
+  float elapsedtime = (starttime / hertz);
+  float seconds = (uptime - elapsedtime);
+  float cpu_usage = (total_time / hertz ) / seconds;   
+  
+  return cpu_usage;
 }
