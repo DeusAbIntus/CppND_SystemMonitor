@@ -376,29 +376,30 @@ vector<string> LinuxParser::ProcessStatData(int pid) {
 // CPU usage calculated according to Stackoverflow Post :
 // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
 float LinuxParser::ProcessCpuUtilization(int pid) {
-  //old code
+  //old code. doesnt work for some reason
   /*long ProcActiveJiffies = LinuxParser::ActiveJiffies(pid);
   long SysUptime = LinuxParser::UpTime();
   long ProcUptime = LinuxParser::UpTime(pid);
   float CpuUsage = (float)((ProcActiveJiffies/sysconf(_SC_CLK_TCK))/(SysUptime - ProcUptime));
   return CpuUsage;*/
 
-  std::vector<string> ProcessData = LinuxParser::ProcessStatData(pid);
-  /*string line;
+  std::vector<string> ProcessData = LinuxParser::ProcessStatData(pid); // using helper function to read process stat file
  
-  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
-  
+// code that reads the process stat file. works similar to the helper function ProcessStatData from above.
+// This code was implemented to check if we get different result for the Cpu usage. No difference found
+ /*string line;
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename)
   std::getline(filestream, line); // file contains only one line    
   std::istringstream buffer(line);
   std::istream_iterator<string> start(buffer), end;
   std::vector<string> ProcessData(start, end);*/
 
   float uptime = LinuxParser::UpTime();
-  float utime = stof(ProcessData[kutime_]);
-  float stime = stof(ProcessData[kstime_]);
-  float cutime = stof(ProcessData[kcuttime_]);
-  float cstime = stof(ProcessData[kcstime_]);
-  float starttime = stof(ProcessData[kstarttime_]); 
+  float utime = stof(ProcessData[kutime_]); //kutime = 13
+  float stime = stof(ProcessData[kstime_]); //kstime = 14
+  float cutime = stof(ProcessData[kcuttime_]);  //kcuttime = 15
+  float cstime = stof(ProcessData[kcstime_]); //kcstime = 16
+  float starttime = stof(ProcessData[kstarttime_]); //kstarttime = 21
   float hertz = sysconf(_SC_CLK_TCK);
 
   float total_time = utime + stime + cutime + cstime;
