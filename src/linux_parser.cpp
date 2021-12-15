@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "linux_parser.h"
 
@@ -375,21 +376,22 @@ vector<string> LinuxParser::ProcessStatData(int pid) {
 // CPU usage calculated according to Stackoverflow Post :
 // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
 float LinuxParser::ProcessCpuUtilization(int pid) {
+  //old code
   /*long ProcActiveJiffies = LinuxParser::ActiveJiffies(pid);
   long SysUptime = LinuxParser::UpTime();
   long ProcUptime = LinuxParser::UpTime(pid);
   float CpuUsage = (float)((ProcActiveJiffies/sysconf(_SC_CLK_TCK))/(SysUptime - ProcUptime));
   return CpuUsage;*/
 
- // std::vector<string> ProcessData = LinuxParser::ProcessStatData(pid);
-  string line;
+  std::vector<string> ProcessData = LinuxParser::ProcessStatData(pid);
+  /*string line;
  
   std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
   
   std::getline(filestream, line); // file contains only one line    
   std::istringstream buffer(line);
-  std::istream_iterator<string> beginning(buffer), end;
-  std::vector<string> ProcessData(beginning, end);
+  std::istream_iterator<string> start(buffer), end;
+  std::vector<string> ProcessData(start, end);*/
 
   float uptime = LinuxParser::UpTime();
   float utime = stof(ProcessData[kutime_]);
@@ -400,8 +402,8 @@ float LinuxParser::ProcessCpuUtilization(int pid) {
   float hertz = sysconf(_SC_CLK_TCK);
 
   float total_time = utime + stime + cutime + cstime;
-  float elapsedtime = (starttime / hertz);
-  float seconds = (uptime - elapsedtime);
+  float elapsedtime = starttime / hertz;
+  float seconds = uptime - elapsedtime;
   float cpu_usage = (total_time / hertz ) / seconds;   
   
   return cpu_usage;
