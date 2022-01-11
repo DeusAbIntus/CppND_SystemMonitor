@@ -274,21 +274,25 @@ string LinuxParser::Command(int pid) {
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid) { 
-  string line;
-  string attributeName; 
-  long attributeValue, ram_;
-  std::ifstream filestream(kProcDirectory+to_string(pid)+kStatusFilename);
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
+
+  string line, attributeName, attributeValue;
+  
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatusFilename);
+  if (filestream.is_open()) 
+  {
+    while (std::getline(filestream, line)) 
+    {
       std::istringstream linestream(line);
-      while (linestream >> attributeName >> attributeValue) {
-        if (attributeName == "VmSize:") {
-          ram_ = attributeValue;
+      while (linestream >> attributeName >> attributeValue) 
+      {
+        if (attributeName == "VmSize:") 
+        {
+          return to_string(stol(attributeValue) / 1024);
         }
       }
     }
   }
-  return to_string(ram_/1024); 
+  return "0"; 
 }
 
 // TODO: Read and return the user ID associated with a process
@@ -337,7 +341,7 @@ string LinuxParser::User(int pid) {
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid) { 
   std::vector<string> ProcessVector = LinuxParser::ProcessStatData(pid);
-  float ProcUptime = std::stof(ProcessVector[kstarttime_])/sysconf(_SC_CLK_TCK);
+  long ProcUptime = (std::stol(ProcessVector[kstarttime_]))/sysconf(_SC_CLK_TCK);
   /*string line;
   string DataValue; 
   std::ifstream filestream(kProcDirectory+to_string(pid)+kStatFilename);

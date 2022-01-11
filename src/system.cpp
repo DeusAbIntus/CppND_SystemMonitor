@@ -22,15 +22,16 @@ Processor& System::Cpu() { return cpu_; }
 
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() { 
-  //  this->processes_.clear(); 
+    processes_.clear(); 
 // retrieving vector<int> containing all Process Pids in directories.    
 std::vector<int> ProcessPids = LinuxParser::Pids();
  //creating for loop to iterate through each element of Processpids
- for(int i : ProcessPids) {
+ for(int& i : ProcessPids) {
     Process NewProcess(i); // calling the Process contructor on each element of ProcessPids vector.
-    System::processes_.push_back(NewProcess);
+    processes_.emplace_back(NewProcess);
  } 
- std::sort(this->processes_.begin(),this->processes_.end());
+ std::sort(processes_.begin(),processes_.end());
+ reverse(processes_.begin(), processes_.end());
  return   processes_; 
 }
 
